@@ -432,11 +432,9 @@ function fetchExpenseClaim() {
 			j("#source tr").click(function(){ 
 				headerOprationBtn = defaultPagePath+'headerPageForBEOperation.html';
 				if(j(this).hasClass("selected")){ 
-				var pageRef=defaultPagePath+'fairClaimTable.html';
 				var headerBackBtn=defaultPagePath+'headerPageForBEOperation.html';
 					j(this).removeClass('selected');
 					j('#mainHeader').load(headerBackBtn);
-					j('#mainContainer').load(pageRef);
 				}else{
 				if(j(this).text()=='DateExpense NameNarration From/To LocAmt'){
 					
@@ -528,11 +526,9 @@ function fetchExpenseClaim() {
 			j("#source tr").click(function(){
 				headerOprationBtn = defaultPagePath+'headerPageForTSOperation.html';
 				if(j(this).hasClass("selected")){ 
-				var pageRef=defaultPagePath+'travelSettlementTable.html';
 				var headerBackBtn=defaultPagePath+'headerPageForTSOperation.html';
 					j(this).removeClass('selected');
 					j('#mainHeader').load(headerBackBtn);
-					j('#mainContainer').load(pageRef);
 				}else{
 					if(j(this).text()=='DateExpense NameAmtcityTownNarration'){
 						
@@ -1091,7 +1087,6 @@ function fetchWalletImage() {
 						var pageRef=defaultPagePath+'addToWallet.html';
 							j(this).removeClass('selected');
 							j('#mainHeader').load(headerOprationBtn);
-							j('#mainContainer').load(pageRef);
 						}else{
 							j('#mainHeader').load(headerOprationBtn);
 							j(this).addClass('selected');					

@@ -119,6 +119,8 @@ var username = document.getElementById("userName");
 var pwd = document.getElementById("pass");
 if(username.value == "" || pwd.value == ""){
 	alert("Please Insert UserName or Password");
+	document.getElementById("pass").value = "";
+	document.getElementById("userName").value = "";
 }else{
 	commanLogin();
 }

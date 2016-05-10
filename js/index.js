@@ -82,6 +82,7 @@ function login()
  	var userName = document.getElementById("userName");
  	var userNameValue = userName.value; 
  	var domainName = userNameValue.split('@')[1];
+ 	alert("domainName "+domainName+" userNameValue "+userNameValue);
 	var jsonToDomainNameSend = new Object();
   	jsonToDomainNameSend["userName"] = domainName;
 	WebServicePath = WebServicePath + JSON.stringify(jsonToDomainNameSend);

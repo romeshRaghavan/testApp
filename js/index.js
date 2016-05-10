@@ -100,15 +100,28 @@ function login()
 			  	document.getElementById("loginErrorMsg").innerHTML = successMessage;
  			   j('#loginErrorMsg').hide().fadeIn('slow').delay(2000).fadeOut('slow');
  			}else{
-				successMessage = data.message;
-             alert(successMessage);
-           }
+ 				successMessage = data.message;
+ 				if(successMessage == "" || successMessage == null){
+ 				alert("Please enter correct username or password");
+ 				}else{
+ 				alert(successMessage);	
+ 				}	
+ 			}
 		},
          error:function(data) {
-		   
-         }
+		 }
    });
 
+}
+
+function validateLoginDetails(){
+var username = document.getElementById("userName");
+var pwd = document.getElementById("pass");
+if(username.value == "" || pwd.value == ""){
+	alert("Please Insert UserName or Password");
+}else{
+	commanLogin();
+}
 }
 
   function createBusinessExp(){

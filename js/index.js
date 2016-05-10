@@ -84,9 +84,10 @@ function login()
  	var domainName = userNameValue.split('@')[1];
  	var jsonToDomainNameSend = new Object();
   	jsonToDomainNameSend["userName"] = domainName;
-	WebServicePath = WebServicePath + JSON.stringify(jsonToDomainNameSend);
+	var res=JSON.stringify(jsonToDomainNameSend);
+	var requestPath = WebServicePath +res;
 	j.ajax({
-         url: WebServicePath,
+         url: requestPath,
          type: 'GET',
          dataType: 'json',
          crossDomain: true,
@@ -102,8 +103,8 @@ function login()
  			}else{
  				successMessage = data.message;
  				if(successMessage == "" || successMessage == null){
- 				alert("Please enter correct username or password");
- 				}else{
+				alert("Please enter correct username or password");				
+				}else{
  				alert(successMessage);	
  				}	
  			}
@@ -119,8 +120,6 @@ var username = document.getElementById("userName");
 var pwd = document.getElementById("pass");
 if(username.value == "" || pwd.value == ""){
 	alert("Please Insert UserName or Password");
-	document.getElementById("pass").value = "";
-	document.getElementById("userName").value = "";
 }else{
 	commanLogin();
 }

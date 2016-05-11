@@ -2,8 +2,7 @@ var j = jQuery.noConflict();
 var defaultPagePath='app/pages/';
 var headerMsg = "Expenzing";
 var urlPath;
-//var WebServicePath = 'http://live.nexstepapps.com:8284/NexstepWebService/mobileLinkResolver.service?result=';
-var WebServicePath = 'http://1.255.255.188:8088/NexstepWebService/mobileLinkResolver.service?result=';
+var WebServicePath = 'http://live.nexstepapps.com:8284/NexstepWebService/mobileLinkResolver.service?result=';
 var clickedFlagCar = false;
 var clickedFlagTicket = false;
 var clickedFlagHotel = false;
@@ -23,6 +22,7 @@ var fileTempCameraBE ="";
 var fileTempCameraTS ="";
 var fileTempGalleryBE ="";
 var fileTempGalleryTS ="";
+
 j(document).ready(function(){ 
 document.addEventListener("deviceready",loaded,false);
 });
@@ -30,15 +30,19 @@ document.addEventListener("deviceready",loaded,false);
 function login()
    {
 
+   	if(document.getElementById("userName")!=null){
     var userName = document.getElementById("userName");
-    var password = document.getElementById("pass");
-
+	}else if(document.getElementById("userName")!=null){
+		var userName = document.getElementById("userNameId");
+	}
+	var password = document.getElementById("pass");
+    
     var jsonToBeSend=new Object();
     jsonToBeSend["user"] = userName.value;
     jsonToBeSend["pass"] = password.value;
-    
-	var headerBackBtn=defaultPagePath+'categoryMsgPage.html';
+   	var headerBackBtn=defaultPagePath+'categoryMsgPage.html';
 	var pageRef=defaultPagePath+'category.html';
+	urlPath=window.localStorage.getItem("urlPath");
 	j('#loading').show();
     j.ajax({
          url: urlPath+"LoginWebService",
@@ -52,7 +56,8 @@ function login()
              j('#mainContainer').load(pageRef);
               appPageHistory.push(pageRef);
 			  //addEmployeeDetails(data);
-			  setUserSessionDetails(data,urlPath);
+			  setUserStatusInLocalStorage("Valid");
+			  setUserSessionDetails(data,jsonToBeSend);
 			  if(data.TrRole){
 				synchronizeTRMasterData();
 				synchronizeTRForTS();  
@@ -79,13 +84,15 @@ function login()
 
  }
  
- function commanLogin(){
+function commanLogin(){
  	var userName = document.getElementById("userName");
  	var userNameValue = userName.value; 
  	var domainName = userNameValue.split('@')[1];
- 	var jsonToDomainNameSend = new Object();
-  	jsonToDomainNameSend["userName"] = domainName;
-	var res=JSON.stringify(jsonToDomainNameSend);
+	var jsonToDomainNameSend = new Object();
+	jsonToDomainNameSend["userName"] = domainName;
+	//jsonToDomainNameSend["mobilePlatform"] = device.platform;
+	//jsonToDomainNameSend["mobilePlatform"] = "Android";
+  	var res=JSON.stringify(jsonToDomainNameSend);
 	var requestPath = WebServicePath +res;
 	j.ajax({
          url: requestPath,
@@ -96,10 +103,11 @@ function login()
 		 success: function(data) {
          	if (data.status == 'Success'){
          		urlPath = data.message;
+         		setUrlPathLocalStorage(urlPath);
          		login();
         	}else if(data.status == 'Failure'){
 				successMessage = data.message;
-			  	document.getElementById("loginErrorMsg").innerHTML = successMessage;
+				document.getElementById("loginErrorMsg").innerHTML = successMessage;
  			   j('#loginErrorMsg').hide().fadeIn('slow').delay(2000).fadeOut('slow');
  			}else{
  				successMessage = data.message;
@@ -111,19 +119,9 @@ function login()
  			}
 		},
          error:function(data) {
-		 }
+		   
+         }
    });
-
-}
-
-function validateLoginDetails(){
-var username = document.getElementById("userName");
-var pwd = document.getElementById("pass");
-if(username.value == "" || pwd.value == ""){
-	alert("Please Insert UserName or Password");
-}else{
-	commanLogin();
-}
 }
 
   function createBusinessExp(){
@@ -186,13 +184,19 @@ if(username.value == "" || pwd.value == ""){
  function init() {
 	 var pgRef;
 	var headerBackBtn;
-	
 	if(window.localStorage.getItem("EmployeeId")!= null){
-		pgRef=defaultPagePath+'category.html';
-		
-		headerBackBtn=defaultPagePath+'categoryMsgPage.html';
-	}
-	else{
+		if(window.localStorage.getItem("UserStatus")=='ResetPswd'){
+			headerBackBtn=defaultPagePath+'expenzingImagePage.html';
+			pgRef=defaultPagePath+'loginPageResetPswd.html';
+		}else if(window.localStorage.getItem("UserStatus")=='Valid'){
+			pgRef=defaultPagePath+'category.html';
+			headerBackBtn=defaultPagePath+'categoryMsgPage.html';
+		}else{
+			headerBackBtn=defaultPagePath+'expenzingImagePage.html';
+		pgRef=defaultPagePath+'loginPage.html';
+		}
+
+	}else{
 		headerBackBtn=defaultPagePath+'expenzingImagePage.html';
 		pgRef=defaultPagePath+'loginPage.html';
 	}
@@ -200,7 +204,14 @@ if(username.value == "" || pwd.value == ""){
 	j(document).ready(function() {
 		j('#mainHeader').load(headerBackBtn);
 			j('#mainContainer').load(pgRef);
-
+			j('#mainContainer').load(pgRef,function() {
+  						if(window.localStorage.getItem("UserStatus")!=null
+  							&& window.localStorage.getItem("UserStatus")=='ResetPswd'){
+  							document.getElementById("userNameLabel").innerHTML=window.localStorage.getItem("UserName");
+  							document.getElementById("userName").value=window.localStorage.getItem("UserName");
+  						}
+		 			  
+					});
 			j('#mainContainer').swipe({
 				swipe:function(event,direction,distance,duration,fingercount){
 					switch (direction) {
@@ -1164,7 +1175,7 @@ function onloadTimePicker(){
 
 
 function setPerUnitDetails(transaction, results){
- 		
+ 		 
     	if(results!=null){
 		        var row = results.rows.item(0);
 		        perUnitDetailsJSON["expenseIsfromAndToReqd"]=row.expIsFromToReq;
@@ -1174,6 +1185,8 @@ function setPerUnitDetails(transaction, results){
 		        perUnitDetailsJSON["expFixedLimitAmt"]=row.expFixedLimitAmt;
 		        perUnitDetailsJSON["expenseName"]=row.expName;
 				perUnitDetailsJSON["expPerUnitActiveInative"]=row.expPerUnitActiveInative;
+				perUnitDetailsJSON["isErReqd"]=row.isErReqd;
+				perUnitDetailsJSON["limitAmountForER"]=row.limitAmountForER;
 		        document.getElementById("expAmt").value="";
 		        document.getElementById("expUnit").value="";
 		        if(perUnitDetailsJSON.expenseIsfromAndToReqd=='N'){
@@ -1261,33 +1274,42 @@ function setPerUnitDetails(transaction, results){
 			 var expActiveInactive = perUnitDetailsJSON.expPerUnitActiveInative;
  			 var amount=document.getElementById("expAmt").value;
  			 var unitValue=document.getElementById("expUnit").value;
- 			if (expActiveInactive == '1'){
-					exceptionStatus = "N";
- 						j('#errorMsgArea').children('span').text("");
-				}if (perUnitStatus != "" && limitAmt != "" &&  amount != ""
- 						 && perUnitStatus =='N' && expActiveInactive !='1'){
- 					if (parseFloat(limitAmt) < parseFloat(amount)){
- 						 exceptionStatus = "Y";
- 						 exceptionMessage = "(Exceeding per unit amount defined: "
- 							 + limitAmt + " for expense name " + expName+")";
- 							 j('#errorMsgArea').children('span').text(exceptionMessage);
- 					 }else{
- 						 exceptionStatus = "N";
- 						 j('#errorMsgArea').children('span').text("");
- 					 }
- 				}else if (perUnitStatus != "" && ratePerUnit != "" && amount != ""
- 						 && fixedOrVariable != "" && unitValue != "" && perUnitStatus =='Y'
- 						 && fixedOrVariable =='V' && expActiveInactive !='1'){
+ 			 var isErReqd= perUnitDetailsJSON.isErReqd;
+ 			 var limitAmountForER= perUnitDetailsJSON.limitAmountForER;
+ 			 if(isErReqd=='Y'){
+ 			 	
+				alert("Entered expense/s require approved Expense Request. Please enter through web portal.");
+				document.getElementById("expAmt").value="";
+ 			 	
+ 			 }else{
+	 			if (expActiveInactive == '1'){
+						exceptionStatus = "N";
+	 						j('#errorMsgArea').children('span').text("");
+					}if (perUnitStatus != "" && limitAmt != "" &&  amount != ""
+	 						 && perUnitStatus =='N' && expActiveInactive !='1'){
+	 					if (parseFloat(limitAmt) < parseFloat(amount)){
+	 						 exceptionStatus = "Y";
+	 						 exceptionMessage = "(Exceeding per unit amount defined: "
+	 							 + limitAmt + " for expense name " + expName+")";
+	 							 j('#errorMsgArea').children('span').text(exceptionMessage);
+	 					 }else{
+	 						 exceptionStatus = "N";
+	 						 j('#errorMsgArea').children('span').text("");
+	 					 }
+	 				}else if (perUnitStatus != "" && ratePerUnit != "" && amount != ""
+	 						 && fixedOrVariable != "" && unitValue != "" && perUnitStatus =='Y'
+	 						 && fixedOrVariable =='V' && expActiveInactive !='1'){
 
- 					 if (parseFloat(ratePerUnit) < amount/unitValue){
- 						 exceptionStatus = "Y";
- 						 exceptionMessage = "(Exceeding per unit amount defined: "
- 							 + ratePerUnit + " for expense name " + expName+")";
- 							 j('#errorMsgArea').children('span').text(exceptionMessage);
- 					 }else{
- 						 exceptionStatus = "N";
- 						  j('#errorMsgArea').children('span').text("");
- 					 }
+	 					 if (parseFloat(ratePerUnit) < amount/unitValue){
+	 						 exceptionStatus = "Y";
+	 						 exceptionMessage = "(Exceeding per unit amount defined: "
+	 							 + ratePerUnit + " for expense name " + expName+")";
+	 							 j('#errorMsgArea').children('span').text(exceptionMessage);
+	 					 }else{
+	 						 exceptionStatus = "N";
+	 						  j('#errorMsgArea').children('span').text("");
+	 					 }
+					}
 				}
  				
  	}
@@ -1898,5 +1920,69 @@ function hideTRMenus(){
 		document.getElementById('TrRoleID').style.display="block";
 	}else{
 		document.getElementById('TrRoleID').style.display="none";
+	}
+}
+function validateValidMobileUser(){
+	var pgRef;
+	var headerBackBtn;
+	var jsonToBeSend=new Object();
+	if(window.localStorage.getItem("EmployeeId")!= null
+		&& (window.localStorage.getItem("UserStatus")==null || window.localStorage.getItem("UserStatus")=='Valid')){
+		jsonToBeSend["user"]=window.localStorage.getItem("UserName");
+		jsonToBeSend["pass"]=window.localStorage.getItem("Password");
+		j.ajax({
+	         url:  window.localStorage.getItem("urlPath")+"ValidateUserWebservice",
+	         type: 'POST',
+	         dataType: 'json',
+	         crossDomain: true,
+	         data: JSON.stringify(jsonToBeSend),
+	         success: function(data) {
+	         	
+	         	 if(data.Status == 'Success'){
+	         	 	setUserStatusInLocalStorage("Valid");
+	           }else if(data.Status == 'NoAndroidRole'){
+	         	 	successMessage = data.Message;
+	         	 	headerBackBtn=defaultPagePath+'expenzingImagePage.html';
+					pgRef=defaultPagePath+'loginPage.html';
+					setUserStatusInLocalStorage("Invalid");
+					j('#mainHeader').load(headerBackBtn);
+             		j('#mainContainer').load(pgRef,function() {
+  						document.getElementById("loginErrorMsg").innerHTML = successMessage;
+		 			   j('#loginErrorMsg').hide().fadeIn('slow').delay(4000).fadeOut('slow');
+		 			   j('#loading').hide();
+					});
+				  
+	           }else if(data.Status == 'InactiveUser'){
+				   successMessage = data.Message;
+	         	 	headerBackBtn=defaultPagePath+'expenzingImagePage.html';
+					pgRef=defaultPagePath+'loginPage.html';
+					 j('#mainHeader').load(headerBackBtn);
+					 setUserStatusInLocalStorage("Inactive");
+					 resetUserSessionDetails();
+             		j('#mainContainer').load(pgRef,function() {
+  						document.getElementById("loginErrorMsg").innerHTML = successMessage;
+		 			   j('#loginErrorMsg').hide().fadeIn('slow').delay(4000).fadeOut('slow');
+		 			   j('#loading').hide();
+					});
+	           }else if(data.Status == 'ChangedUserCredentials'){
+				    successMessage = data.Message;
+	         	 	headerBackBtn=defaultPagePath+'expenzingImagePage.html';
+					pgRef=defaultPagePath+'loginPageResetPswd.html';
+					 setUserStatusInLocalStorage("ResetPswd");
+					j('#mainHeader').load(headerBackBtn);
+             		j('#mainContainer').load(pgRef,function() {
+  						document.getElementById("loginErrorMsg").innerHTML = successMessage;
+  						document.getElementById("userNameLabel").innerHTML=window.localStorage.getItem("UserName");
+  						document.getElementById("userName").value=window.localStorage.getItem("UserName");
+		 			   j('#loginErrorMsg').hide().fadeIn('slow').delay(4000).fadeOut('slow');
+		 			   j('#loading').hide();
+					});
+	           }
+
+	         },
+	         error:function(data) {
+			  
+	         }
+	   });
 	}
 }

@@ -22,6 +22,8 @@ var fileTempCameraBE ="";
 var fileTempCameraTS ="";
 var fileTempGalleryBE ="";
 var fileTempGalleryTS ="";
+var mapToCalcERAmt = new Map();
+var requestRunning = false;
 
 j(document).ready(function(){ 
 document.addEventListener("deviceready",loaded,false);
@@ -288,6 +290,7 @@ function saveBusinessExpDetails(jsonBEArr,busExpDetailsArr){
 	 jsonToSaveBE["employeeId"] = window.localStorage.getItem("EmployeeId");;
 	 jsonToSaveBE["ProcessStatus"] = "0";
 	 jsonToSaveBE["expenseDetails"] = jsonBEArr;
+	 requestRunning = true;
 	 var pageRef=defaultPagePath+'success.html';
 	 j('#loading_Cat').show();
 	 j.ajax({
@@ -303,6 +306,7 @@ function saveBusinessExpDetails(jsonBEArr,busExpDetailsArr){
 							var businessExpDetailId = busExpDetailsArr[i];
 							deleteSelectedExpDetails(businessExpDetailId);
 						 }
+						 requestRunning = false;
 						 j('#mainHeader').load(headerBackBtn);
 						 j('#mainContainer').load(pageRef);
 						 //appPageHistory.push(pageRef);
@@ -328,6 +332,7 @@ function saveTravelSettleExpDetails(jsonTSArr,tsExpDetailsArr){
 	 var jsonToSaveTS = new Object();
 	 jsonToSaveTS["employeeId"] = window.localStorage.getItem("EmployeeId");
 	 jsonToSaveTS["expenseDetails"] = jsonTSArr;
+	 requestRunning = true;
 	 var pageRef=defaultPagePath+'success.html';
 	j.ajax({
 				  url: window.localStorage.getItem("urlPath")+"SyncSettlementExpensesWebService",
@@ -342,6 +347,7 @@ function saveTravelSettleExpDetails(jsonTSArr,tsExpDetailsArr){
 						var travelSettleExpDetailId = tsExpDetailsArr[i];
 						deleteSelectedTSExpDetails(travelSettleExpDetailId);
 					 }
+					 requestRunning = false;
 					 j('#mainHeader').load(headerBackBtn);
 					 j('#mainContainer').load(pageRef);
 					 }else if(data.Status=="Error"){
@@ -397,6 +403,7 @@ j.ajax({
 							var businessExpDetailId = busExpDetailsArr[i];
 							deleteSelectedExpDetails(businessExpDetailId);
 						 }
+						 requestRunning = false;
 						 j('#loading_Cat').hide();
 						 j('#mainHeader').load(headerBackBtn);
 						 j('#mainContainer').load(pageRef);
@@ -1498,13 +1505,15 @@ function oprationOnExpenseClaim(){
 				var jsonExpenseDetailsArr = [];
 				  var busExpDetailsArr = [];
 				  expenseClaimDates=new Object;
-				  
+				  if(requestRunning){
+							  return;
+							   }
 				  var accountHeadIdToBeSent=''
 					  if(j("#source tr.selected").hasClass("selected")){
 						  j("#source tr.selected").each(function(index, row) {
 							  var busExpDetailId = j(this).find('td.busExpId').text();
 							  var jsonFindBE = new Object();
-								
+
 							  var expDate = j(this).find('td.expDate1').text();
 							  var expenseDate  = expDate;
 							  var currentDate=new Date(expenseDate);
@@ -1573,6 +1582,7 @@ function oprationOnExpenseClaim(){
 								  jsonExpenseDetailsArr.push(jsonFindBE);
 
 								  busExpDetailsArr.push(busExpDetailId);
+								  requestRunning = true;
 							  }
 						  });
 						  
@@ -1607,7 +1617,7 @@ function oprationOnExpenseClaim(){
 					  alert("Tap and select Expenses to delete.");
 				  }
 			});
-	j('#synch').on('click', function(e){
+      j('#synch').on('click', function(e){
 				  var busExpDetailsArr = [];
 				  var jsonExpenseDetailsArr = [];
 				  expenseClaimDates=new Object;
@@ -1617,7 +1627,9 @@ function oprationOnExpenseClaim(){
 						  var jsonFindBE = new Object();
 						  var expDate = j(this).find('td.expDate1').text();
 						  var expenseDate = expDate;
-
+						  if(requestRunning){
+							  return;
+							}
 						  jsonFindBE["expenseDate"] = expenseDate;
 						  jsonFindBE["accountHeadId"] =j(this).find('td.accHeadId').text();
 						  jsonFindBE["accountCodeId"] = j(this).find('td.accountCodeId').text();
@@ -1670,9 +1682,12 @@ function oprationONTravelSettlementExp(){
 				  j("#source tr.selected").each(function(index, row) {
 					var travelSettleDetailId = j(this).find('td.tsExpId').text();
 					var jsonFindTS = new Object();
-
-					var expDate = j(this).find('td.expDate1').text();
 					
+                    var expDate = j(this).find('td.expDate1').text();
+					
+					if(requestRunning){
+							  return;
+							}
 					var expenseDate = expDate;
 										
 					jsonFindTS["expenseDate"] = expenseDate;
@@ -1680,19 +1695,16 @@ function oprationONTravelSettlementExp(){
 					jsonFindTS["accountCodeId"] = j(this).find('td.accountCodeId').text();
 					jsonFindTS["expenseId"] =j(this).find('td.expNameId').text();
 					jsonFindTS["ExpenseName"] = j(this).find('td.expName').text();
-
 					jsonFindTS["travelModeId"] = j(this).find('td.modeId').text();
 					jsonFindTS["travelCategoryId"] = j(this).find('td.categoryId').text();
 					jsonFindTS["cityTownId"] = j(this).find('td.fromcityTownId').text();
 					jsonFindTS["isModeCategory"] = j(this).find('td.isModeCategory').text();
-
 					jsonFindTS["narration"] = j(this).find('td.expNarration1').text();
 					jsonFindTS["units"] = j(this).find('td.expUnit').text();
 					jsonFindTS["amount"] = j(this).find('td.expAmt1').text();
 					jsonFindTS["currencyId"] = j(this).find('td.currencyId').text();
 					
 					var dataURL =  j(this).find('td.tsExpAttachment').text();
-					
 					//For IOS image save
 					var data = dataURL.replace(/data:image\/(png|jpg|jpeg);base64,/, '');
 					

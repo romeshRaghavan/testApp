@@ -1,7 +1,7 @@
 var j = jQuery.noConflict();
 var defaultPagePath='app/pages/';
 var headerMsg = "Expenzing";
-var urlPath='http://14.140.170.141:80/idbi_tne_uat/WebService/Login/';
+var urlPath;
 var WebServicePath = 'http://live.nexstepapps.com:8284/NexstepWebService/mobileLinkResolver.service';
 var clickedFlagCar = false;
 var clickedFlagTicket = false;
@@ -45,8 +45,7 @@ function login()
     jsonToBeSend["pass"] = password.value;
    	var headerBackBtn=defaultPagePath+'categoryMsgPage.html';
 	var pageRef=defaultPagePath+'category.html';
-	setUrlPathLocalStorage(urlPath);
-	//urlPath=window.localStorage.getItem("urlPath");
+	urlPath=window.localStorage.getItem("urlPath");
 	j('#loading').show();
     j.ajax({
          url: urlPath+"LoginWebService",
@@ -915,7 +914,7 @@ function saveTravelRequestAjax(jsonToSaveTR){
 							 j('#loading_Cat').hide();
 						}
 					  successMessage = data.Message;
-					  alert(successMessage);
+					  //alert(successMessage);
 					  j('#loading_Cat').hide();
 				  }else if(data.Status=="Success"){
 					  successMessage = data.Message;
@@ -1406,15 +1405,26 @@ function setDelayMessage(returnJsonData,jsonToBeSend,busExpDetailsArr){
 
 function setTREntitlementExceedMessage(returnJsonData,jsonToBeSend){
 		var pageRef=defaultPagePath+'success.html';
-	if(confirm(returnJsonData.Message+".\nThis voucher has exceeded Entitlements. Do you want to proceed?")==false){
-		return false;
+		var msg=returnJsonData.Message+".\nThis voucher has exceeded Entitlements. Do you want to proceed?";
+	navigator.notification.confirm(msg,
+		function(buttonIndex){
+            onConfirm(buttonIndex, msg,jsonToBeSend);
+        }, 
+		'confirm', 'Yes, No');
+
+	
 	}
-		 jsonToBeSend["EntitlementAllowCheck"]=true;
-		 saveTravelRequestAjax(jsonToBeSend);
-				
+
+function onConfirm(buttonIndex,errormsg,jsonToBeSend){
+    if (buttonIndex === 1){
+    	jsonToBeSend["EntitlementAllowCheck"]=true;
+		saveTravelRequestAjax(jsonToBeSend);
+    }else{
+    	return false;
+    }
+
 }
 
-		
 	 function cerateTravelSettlement(){
 		
 	      var pageRef=defaultPagePath+'addTravelSettlement.html';

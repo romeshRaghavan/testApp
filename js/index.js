@@ -24,6 +24,7 @@ var fileTempGalleryBE ="";
 var fileTempGalleryTS ="";
 var mapToCalcERAmt = new Map();
 var requestRunning = false;
+var flagForUnitEnable = false;
 
 j(document).ready(function(){ 
 document.addEventListener("deviceready",loaded,false);
@@ -670,6 +671,16 @@ function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,e
 		alert("Expense Name is invalid");
 		return false;
 	}
+	if(flagForUnitEnable == true){
+		if(isZero(exp_unit,"Unit")==false){
+			document.getElementById("expUnit").value = "";
+			return false;
+		}
+	}	
+	if(isZero(exp_amt,"Amount")==false){
+		document.getElementById("expAmt").value = "";
+		return false;
+	}
 	if(perUnitDetailsJSON.expenseIsfromAndToReqd!='N'){
 		if(exp_from_loc == ""){
 			alert("From Location is invalid");
@@ -716,14 +727,6 @@ function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,e
 }
 
 
-function isOnlyNumeric(object,messageContent) {
-	if(object.search(/^[0-9]*$/) == -1) {
-		alert(messageContent+" should be numeric." );
-		return false;
-	}else {
-		return true;
-	}
-}
 
 function syncSubmitTravelDetails(){
 	
@@ -1213,23 +1216,27 @@ function setPerUnitDetails(transaction, results){
 				if(perUnitDetailsJSON.isUnitReqd=='Y'){
 					document.getElementById("expAmt").value="";
 					if(perUnitDetailsJSON.expFixedOrVariable=='V'){
+						flagForUnitEnable = true;
 						document.getElementById("expUnit").disabled =false;
 						document.getElementById("expUnit").style.backgroundColor='#FFFFFF'; 
 						document.getElementById("expAmt").disabled =false;
 						document.getElementById("expAmt").style.backgroundColor='#FFFFFF'; 
 					}else{
+						flagForUnitEnable = true;
 						document.getElementById("expUnit").disabled =false;
 						document.getElementById("expUnit").style.backgroundColor='#FFFFFF'; 
 						document.getElementById("expAmt").disabled =true;
 						document.getElementById("expAmt").style.backgroundColor='#d1d1d1'; 
 					}
 				}else{
+					flagForUnitEnable = false;
 					document.getElementById("expUnit").disabled =true;
 					document.getElementById("expAmt").disabled =false;
 					document.getElementById("expAmt").style.backgroundColor='#FFFFFF'; 
 					document.getElementById("expUnit").style.backgroundColor='#d1d1d1'; 
 				}
 				if(perUnitDetailsJSON.expPerUnitActiveInative=='1'){
+					flagForUnitEnable = false;
 					document.getElementById("expUnit").disabled =true;
 					document.getElementById("expAmt").disabled =false;
 					document.getElementById("expAmt").style.backgroundColor='#FFFFFF'; 
@@ -1455,6 +1462,11 @@ function validateTSDetails(exp_date,exp_narration,exp_unit,exp_amt,travelRequest
 			{
 				return false;
 			}
+			if(isZero(exp_unit,"Unit")==false)
+			{
+				document.getElementById("expUnit").value="";
+				return false;
+			}
 		}else{
 			alert("Unit is invalid.");
 			return false;
@@ -1462,6 +1474,11 @@ function validateTSDetails(exp_date,exp_narration,exp_unit,exp_amt,travelRequest
 	if(exp_amt != ""){
 			if(isOnlyNumeric(exp_amt,"Amount")==false)
 			{
+				return false;
+			}
+			if(isZero(exp_amt,"Amount")==false)
+			{
+				document.getElementById("expAmt").value="";
 				return false;
 			}
 		}else{

@@ -1,7 +1,7 @@
 var j = jQuery.noConflict();
 var defaultPagePath='app/pages/';
 var headerMsg = "Expenzing";
-var urlPath= 'http://203.77.177.26/TnEV1_0AWeb/WebService/Login/';
+var urlPath;
 var WebServicePath = 'http://live.nexstepapps.com:8284/NexstepWebService/mobileLinkResolver.service';
 var clickedFlagCar = false;
 var clickedFlagTicket = false;
@@ -45,8 +45,7 @@ function login()
     jsonToBeSend["pass"] = password.value;
    	var headerBackBtn=defaultPagePath+'categoryMsgPage.html';
 	var pageRef=defaultPagePath+'category.html';
-	setUrlPathLocalStorage(urlPath);
-	//urlPath=window.localStorage.getItem("urlPath");
+	urlPath=window.localStorage.getItem("urlPath");
 	j('#loading').show();
     j.ajax({
          url: urlPath+"LoginWebService",

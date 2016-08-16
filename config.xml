@@ -82,6 +82,8 @@
     <gap:splash gap:platform="ios" height="480" src="res/splash/ios/Default.png" width="320" />
     <gap:splash gap:platform="ios" height="960" src="res/splash/ios/Default2x.png" width="640" />
     <gap:splash gap:platform="ios" height="1136" src="res/splash/ios/Default-568h@2x.png" width="640" />
+    <gap:splash gap:platform="ios" height="1334" src="res/splash/ios/default-750X1334.png" width="750" />
+	<gap:splash gap:platform="ios" height="1920" src="res/splash/ios/default-1080X1920-3x.png" width="1080" />
     <gap:splash gap:platform="blackberry" src="www/res/screen/blackberry/screen-225.png" />
     <gap:splash gap:platform="winphone" src="www/res/screen/windows-phone/screen-portrait.jpg" />
     <plugin name="cordova-plugin-whitelist" version="1" />

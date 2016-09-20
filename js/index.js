@@ -46,7 +46,7 @@ function login()
    	var headerBackBtn=defaultPagePath+'categoryMsgPage.html';
 	var pageRef=defaultPagePath+'category.html';
 	//urlPath=window.localStorage.getItem("urlPath");
-	setUrlPathLocalStorage(url);
+	setUrlPathLocalStorage(urlPath);
 	j('#loading').show();
     j.ajax({
          url: urlPath+"LoginWebService",

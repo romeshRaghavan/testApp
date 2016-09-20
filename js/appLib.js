@@ -1381,11 +1381,12 @@ function synchronizeTRForTS() {
 								var tr_end_date = stateArr.TravelEndDate;
 								var tr_start_date = stateArr.TravelStartDate;
 								var tr_DomOrInter = stateArr.TravelDoMOrInter;
-								t.executeSql("INSERT INTO travelRequestDetails (travelRequestId,travelRequestNo,title,accountHeadId,travelEndDate,travelStartDate,travelDomOrInter) VALUES (?, ?,?, ?, ?, ?, ?)", [travel_request_id,travel_request_no,title,ac_head_id,tr_end_date,tr_start_date,tr_DomOrInter]);
+								t.executeSql("INSERT INTO travelRequestDetails (travelRequestId,travelRequestNo,title,accountHeadId,travelEndDate,travelStartDate,travelDomOrInter) VALUES (?, ?, ?, ?, ?, ?, ?)", [travel_request_id,travel_request_no,title,ac_head_id,tr_end_date,tr_start_date,tr_DomOrInter]);
 								
 							}
 						}						
 					});
+				        onloadTravelSettleData();
 					j('#loading_Cat').hide();
 					document.getElementById("syncSuccessMsg").innerHTML = "Travel Request Details synchronized successfully.";
 					j('#syncSuccessMsg').hide().fadeIn('slow').delay(500).fadeOut('slow');

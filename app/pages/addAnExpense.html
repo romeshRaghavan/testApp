@@ -15,27 +15,33 @@
                 <li>
                   <input id="expenseName" type="hidden" style="width: 98%">
                 </li>
-                <li>
-                  <input id="expFromLoc" type="text" style="width: 49%" placeholder="From Location" >
-				  <input id="expToLoc" type="text" style="width: 49%" placeholder="To Location" >
-                </li>
+		<li>
+                  <input id="ratePerUnit" type="hidden" >
+		</li>
+                 <li>
+                  <input id="expFromLoc" type="text" style="width: 49%" placeholder="From Location" onchange="resetUnit();" onblur="setNarration();">
+		  <input id="expToLoc" type="text" style="width: 49%" placeholder="To Location" onchange="resetUnit();" onblur="setNarration();">
+		</li>
                 <li>
                   <input id="expNarration" type="text" placeholder="Enter Expense Narration" >
                 </li>
-                
-				<li>
-				  <p><font face="verdana" size="1" color="green">Unit is no. of persons/Kms/meals etc.</font></span></p>
+                <li>
+		  <p><font face="verdana" size="1" color="green">Unit is no. of persons/Kms/meals etc.</font></span></p>
                   <input id="expUnit" type="tel" style="width: 22%" placeholder="Units" onkeyup="calculatePerUnit();">
-				  <input id="expAmt" type="tel" style="width: 38%" placeholder="Amount" onkeyup="checkPerUnitExceptionStatusForBEAtLineLevel();">
+		  <input id="wayPointunitValue" value="" readonly="readonly" type="hidden">
+		  <input id="expAmt" type="tel" style="width: 38%" placeholder="Amount" onkeyup="checkPerUnitExceptionStatusForBEAtLineLevel();validate();">
                   <input id="currency" type="hidden" style="width: 33%">
-				  <p id="errorMsgArea" ><span id="errorSpan"></span></p>
-				</li>
+		  <p id="errorMsgArea" ><span id="errorSpan"></span></p>
+		</li>
 				
                <div >
 				<li style="text-align:left;">
                   <ul>
 					  <img src="images/camera.png" onclick="capturePhoto(0,'BE');" width="15%" height="15%" >
 					  <img src="images/gallery.png" onclick="getPhoto(pictureSource.PHOTOLIBRARY,0,'BE');" width="15%" height="15%" >
+			  		  <a id="mapLink" href="#openModal" style="" onclick="viewMap();" >
+					  <img src="images/google_map_icon.jpg" width="10%" height="10%" onload="loadImage();" id="mapImage" style="display : none;">
+					  </a>
 					  <img style="display:none;width:40%;height:100px;align:right;" id="smallImageBE" src="" />
 					  <input style="display:none;" type="file" id="imageBE" />
 				  </ul>
@@ -54,6 +60,12 @@
         </div>
 		<div style="display:none" id="loading_Cat" >
                <img src="images/loading2.gif" id="loading-image_Cat" alt="Loading..." >
+		</div>
+      </div>
+      <div id="openModal" class="modalDialog" style="display:none;">
+	    <div>
+		    <a href="#close" onclick="closeMap();"  title="Close" style="color: black;font-size: 16px;background-color: white;" class="close">X</a>
+		    <div id="map" style="width:285px;height:400px"></div>
 		</div>
       </div>
 	  <script>
@@ -80,4 +92,14 @@ var currentYear;
       getPerUnitBasedOnExpense();
   });
 		onloadExpense();
+	function validate()
+	{
+		var field = document.getElementById("expAmt");
+		if (field.value.length > 8 ) {
+			field.value = field.value.substring(0, 8);
+			alert("Amount cannot be greater than 99999999.99");
+			field.value='';
+			return false;
+		}
+	}
 	  </script> 

@@ -1,7 +1,7 @@
 var j = jQuery.noConflict();
 var defaultPagePath='app/pages/';
 var headerMsg = "Expenzing";
-var urlPath ='http://ems.idbifederal.com/idbi_tne_production/WebService/Login/';
+var urlPath ='http://10.23.235.69/ABIB_TnE_UAT/WebService/Login/';
 var WebServicePath = 'http://live.nexstepapps.com:8284/NexstepWebService/mobileLinkResolver.service';
 var clickedFlagCar = false;
 var clickedFlagTicket = false;

@@ -1,7 +1,7 @@
 var j = jQuery.noConflict();
 var defaultPagePath='app/pages/';
 var headerMsg = "Expenzing";
-var urlPath ='http://ems.idbifederal.com/idbi_tne_production/WebService/Login/';
+var urlPath;
 var WebServicePath = 'http://live.nexstepapps.com:8284/NexstepWebService/mobileLinkResolver.service';
 var clickedFlagCar = false;
 var clickedFlagTicket = false;
@@ -45,8 +45,8 @@ function login()
     jsonToBeSend["pass"] = password.value;
    	var headerBackBtn=defaultPagePath+'categoryMsgPage.html';
 	var pageRef=defaultPagePath+'category.html';
-	//urlPath=window.localStorage.getItem("urlPath");
-	setUrlPathLocalStorage(urlPath);
+	urlPath=window.localStorage.getItem("urlPath");
+	//setUrlPathLocalStorage(urlPath);
 	j('#loading').show();
     j.ajax({
          url: urlPath+"LoginWebService",

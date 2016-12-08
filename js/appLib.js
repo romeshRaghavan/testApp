@@ -1096,7 +1096,12 @@ function setUserSessionDetails(val,userJSON){
 	 window.localStorage.setItem("BudgetingStatus",val.BudgetingStatus);
 	 window.localStorage.setItem("UnitId",val.UnitId);
 	 //For Mobile Google Map Role Start
-	 window.localStorage.setItem("MobileMapRole",val.MobileMapRole);
+	 //alert(val.hasOwnProperty('MobileMapRole'));
+	 if(val.hasOwnProperty('MobileMapRole')){
+		window.localStorage.setItem("MobileMapRole",val.MobileMapRole);
+	 }else{
+		window.localStorage.setItem("MobileMapRole",false); 
+	 }
 	 //End
 	 window.localStorage.setItem("UserName",userJSON["user"]);
 	 window.localStorage.setItem("Password",userJSON["pass"]);

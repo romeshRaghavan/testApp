@@ -45,8 +45,9 @@ function login()
     jsonToBeSend["pass"] = password.value;
    	var headerBackBtn=defaultPagePath+'categoryMsgPage.html';
 	var pageRef=defaultPagePath+'category.html';
-	urlPath=window.localStorage.getItem("urlPath");
-	//setUrlPathLocalStorage(urlPath);
+         urlPath=window.localStorage.getItem("urlPath");
+	 //setUrlPathLocalStorage(urlPath);
+	   
 	j('#loading').show();
     j.ajax({
          url: urlPath+"LoginWebService",
@@ -60,13 +61,22 @@ function login()
              j('#mainContainer').load(pageRef);
               appPageHistory.push(pageRef);
 			  //addEmployeeDetails(data);
+                 
 			  setUserStatusInLocalStorage("Valid");
 			  setUserSessionDetails(data,jsonToBeSend);
+                           
+                if(data.hasOwnProperty('EaInMobile') && 
+                 data.EaInMobile != null){
+                  if(data.EaInMobile){
+                 synchronizeEAMasterData();
+                  }
+               }
+            
 			  if(data.TrRole){
 				synchronizeTRMasterData();
 				synchronizeTRForTS();  
 			  }
-			  synchronizeBEMasterData();
+                synchronizeBEMasterData();
 			}else if(data.Status == 'Failure'){
  			   successMessage = data.Message;
 			   if(successMessage.length == 0){
@@ -143,7 +153,7 @@ function commanLogin(){
 
 	 function displayBusinessExp(){
 		 
-		 var headerBackBtn=defaultPagePath+'headerPageForBEOperation.html';
+    var headerBackBtn=defaultPagePath+'headerPageForBEOperation.html';
      var pageRef=defaultPagePath+'fairClaimTable.html';
 			j(document).ready(function() {
 				j('#mainHeader').load(headerBackBtn);
@@ -261,8 +271,7 @@ function isJsonString(str) {
 function viewBusinessExp(){
     var pageRef=defaultPagePath+'fairClaimTable.html';
     var headerBackBtn=defaultPagePath+'headerPageForBEOperation.html';
-	j(document).ready(function() {
-		
+	j(document).ready(function() {	
 		j('#mainHeader').load(headerBackBtn);
 		j('#mainContainer').load(pageRef);
 	});
@@ -454,7 +463,6 @@ function createAccHeadDropDown(jsonAccHeadArr){
 				return 1
 			return 0 //default return value (no sorting)
 			})
-			
 			j("#accountHead").select2({
 				data:{ results: jsonArr, text: 'name' },
 				placeholder: "Account Head",
@@ -723,21 +731,26 @@ function validateExpenseDetails(exp_date,exp_from_loc,exp_to_loc,exp_narration,e
 	}
 	
 	if(perUnitDetailsJSON.expIsUnitReq == 'Y'){
+
 		if(exp_unit != ""){
 			if(isOnlyNumeric(exp_unit,"Unit")==false)
 			{
 				return false;
 			}
+			
 		}else{
 			alert("Unit is invalid");
 			return false;
 		}
 	}
+		
+
 		if(exp_amt != ""){
 			if(isOnlyNumeric(exp_amt,"Amount")==false)
 			{
 				return false;
 			}
+			
 		}else{
 			alert("Amount is invalid");
 			return false;
@@ -917,8 +930,10 @@ function syncSubmitTravelDetails(){
 			return false;
 		}
 }
+
 function saveTravelRequestAjax(jsonToSaveTR){
 	var pageRef=defaultPagePath+'success.html';
+    j('#loading_Cat').show();    
 	 j.ajax({
 			  url: window.localStorage.getItem("urlPath")+"SyncTravelRequestDetail",
 			  type: 'POST',
@@ -929,11 +944,11 @@ function saveTravelRequestAjax(jsonToSaveTR){
 				  if(data.Status=="Failure"){
 					  if(data.hasOwnProperty('IsEntitlementExceed')){
 							setTREntitlementExceedMessage(data,jsonToSaveTR);
-							 j('#loading_Cat').hide();
+							 
 						}
 					  successMessage = data.Message;
 					  //alert(successMessage);
-					  j('#loading_Cat').hide();
+					  
 				  }else if(data.Status=="Success"){
 					  successMessage = data.Message;
 						j('#loading_Cat').hide();
@@ -1476,8 +1491,10 @@ function setTREntitlementExceedMessage(returnJsonData,jsonToBeSend){
 function onConfirm(buttonIndex,errormsg,jsonToBeSend){
     if (buttonIndex === 1){
     	jsonToBeSend["EntitlementAllowCheck"]=true;
+         j('#loading_Cat').show();
 		saveTravelRequestAjax(jsonToBeSend);
     }else{
+        j('#loading_Cat').hide();
     	return false;
     }
 
@@ -1609,7 +1626,24 @@ function createTravelRequestNoDropDown(jsonTravelRequestNoArr){
 }
 function oprationOnExpenseClaim(){
 	j(document).ready(function(){
-		j('#send').on('click', function(e){ 
+        if(window.localStorage.getItem("EaInMobile") == "true"){
+            	j('#send').on('click', function(e){ 
+				  expenseClaimDates=new Object;
+				  if(requestRunning){
+						  	return;
+	    					}
+				  var accountHeadIdToBeSent=''
+					  if(j("#source tr.selected").hasClass("selected")){
+						  j("#source tr.selected").each(function(index, row) {
+							displayEmpAdv();
+														  
+						  });
+					  }else{
+						 alert("Tap and select Expenses to send for Approval with server.");
+					  }
+			});
+        }else{  
+		       j('#send').on('click', function(e){ 
 				var jsonExpenseDetailsArr = [];
 				  var busExpDetailsArr = [];
 				  expenseClaimDates=new Object;
@@ -1674,7 +1708,7 @@ function oprationOnExpenseClaim(){
 									  jsonFindBE["units"] = j(this).find('td.expUnit').text();
 								  }
 								  
-								   jsonFindBE["wayPoint"] = j(this).find('td.wayPoint').text();
+								  jsonFindBE["wayPoint"] = j(this).find('td.wayPoint').text();
 								
 								  jsonFindBE["amount"] = j(this).find('td.expAmt1').text();
 								  jsonFindBE["currencyId"] = j(this).find('td.currencyId').text();
@@ -1703,6 +1737,7 @@ function oprationOnExpenseClaim(){
 						 alert("Tap and select Expenses to send for Approval with server.");
 					  }
 			});
+        }
 			
 		j('#delete').on('click', function(e){ 
 				  var busExpDetailsArr = [];
@@ -2109,7 +2144,6 @@ function validateValidMobileUser(){
 	}
 }
 
-
 function attachGoogleSearchBox(component){
 	//alert("attachGoogleSearchBox")
 	//alert("component   "+component.id)
@@ -2269,3 +2303,672 @@ function setNarration()
 	document.getElementById("expNarration").value = document.getElementById("expDate").value+"--"+document.getElementById("expFromLoc").value+"--"+document.getElementById("expToLoc").value;
 	document.getElementById("expNarration").style.textOverflow = "ellipsis";
 }
+
+
+
+//Index.js   changes by Dinesh
+	 function createReqAdvance(){	 
+      var pageRef=defaultPagePath+'addToRequestAdvs.html';
+      var headerBackBtn=defaultPagePath+'backbtnPage.html';
+			j(document).ready(function() {
+				j('#mainHeader').load(headerBackBtn);
+				j('#mainContainer').load(pageRef);
+			});
+      appPageHistory.push(pageRef);
+	 }
+
+
+
+//Index.js   changes by Dinesh end
+
+//amit index.js changes start
+function createAdvanceTypeDropDown(jsonAdvanceTypeArr){
+	var jsonArr = [];
+	if(jsonAdvanceTypeArr != null && jsonAdvanceTypeArr.length > 0){
+		for(var i=0; i<jsonAdvanceTypeArr.length; i++ ){
+			var stateArr = new Array();
+			stateArr = jsonAdvanceTypeArr[i];
+			jsonArr.push({id: stateArr.Value,name: stateArr.Label});
+		}
+	}
+		
+	j("#empAdvType").select2({
+		data:{ results: jsonArr, text: 'name' },
+		placeholder: "Advance Type",
+		minimumResultsForSearch: -1,
+		formatResult: function(result) {
+			if ( ! isJsonString(result.id))
+				result.id = JSON.stringify(result.id);
+				return result.name;
+		}
+	});
+    var DefaultAdvType =  window.localStorage.getItem("DefaultAdvType");        
+    //j("#empAdvType").select2("val",DefaultAdvType);
+} 
+
+function changeAdavanceType(){
+
+ 	var advTypeID = j("#empAdvType").select2('data').id;
+     //getAdvanceTypeFromDB(advTypeID);
+    populateEATitle();
+ }
+
+function createAccountHeadDropDown(jsonAccountHeadArr){
+	var jsonArr = [];
+	if(jsonAccountHeadArr != null && jsonAccountHeadArr.length > 0){
+		for(var i=0; i<jsonAccountHeadArr.length; i++ ){
+			var stateArr = new Array();
+			stateArr = jsonAccountHeadArr[i];
+			
+			jsonArr.push({id: stateArr.Value,name: stateArr.Label});
+		}
+	}
+		
+	j("#empAdvAccHead").select2({
+		data:{ results: jsonArr, text: 'name' },
+		placeholder: "Expense Type",
+		minimumResultsForSearch: -1,
+		formatResult: function(result) {
+			if ( ! isJsonString(result.id))
+				result.id = JSON.stringify(result.id);
+				return result.name;
+		}
+	});
+      var DefaultAccontHead =  window.localStorage.getItem("DefaultAccontHead");        
+     j("#empAdvAccHead").select2("val",DefaultAccontHead);
+} 
+
+function changeAccountHeadName(){
+
+ 	var acHeadID = j("#empAdvAccHead").select2('data').id;
+    // getAccountHeadFromDB(acHeadID);
+ }
+
+
+
+
+function syncSubmitEmpAdvance(){
+	
+	var empAdvDate = document.getElementById('empAdvDate').value;
+	var empAdvTitle = document.getElementById('empAdvTitle').value;
+	var empAdvjustification = document.getElementById('empAdvjustification').value;
+	var empAdvAmount = document.getElementById('empAdvAmount').value;
+	var empAdvType_id;
+    var empAdvType_Name;
+	var empAccHead_id;
+    var empAccHead_Name;
+	
+	if(j("#empAdvType").select2('data') != null){
+		empAdvType_id = j("#empAdvType").select2('data').id;
+        empAdvType_Name = j("#empAdvType").select2('data').name;
+	}else{
+		empAdvType_id = '-1';
+	}
+	
+	if(j("#empAdvAccHead").select2('data') != null){
+		empAccHead_id = j("#empAdvAccHead").select2('data').id;
+		empAccHead_Name = j("#empAdvAccHead").select2('data').name;
+	}else{
+		from_id = '-1';
+	}	
+	
+
+	if(validateEmpAdvanceDetails(empAdvDate,empAdvTitle,empAdvjustification,empAdvAmount,empAdvType_id,empAdvType_Name,empAccHead_id,empAccHead_Name)){
+
+		 var jsonToSaveEA = new Object();
+		 j('#loading_Cat').show();
+		 jsonToSaveEA["EmployeeId"] = window.localStorage.getItem("EmployeeId");;
+		 jsonToSaveEA["BudgetingStatus"] = window.localStorage.getItem("BudgetingStatus");;
+		 jsonToSaveEA["empAdvDate"] = empAdvDate;
+		 jsonToSaveEA["empAdvTitle"] = empAdvTitle;
+		 jsonToSaveEA["empAdvjustification"] = empAdvjustification;
+		 jsonToSaveEA["empAdvAmount"] = empAdvAmount;
+		 jsonToSaveEA["empAdvType_id"] = empAdvType_id;
+		 jsonToSaveEA["empAccHead_id"] = empAccHead_id;
+		 
+		 
+		 saveEmployeeAdvanceAjax(jsonToSaveEA);
+		}else{
+			return false;
+		}
+    
+}
+
+
+function saveEmployeeAdvanceAjax(jsonToSaveEA){
+    var headerBackBtn=defaultPagePath+'backbtnPage.html';
+	var pageRef=defaultPagePath+'success.html';
+	 j.ajax({
+			  url: window.localStorage.getItem("urlPath")+"SyncSubmitEmployeeAdvanceDetail",
+			  type: 'POST',
+			  dataType: 'json',
+			  crossDomain: true,
+			  data: JSON.stringify(jsonToSaveEA),
+				  success: function(data) {
+				  	if(data.Status=="Success"){
+				        successMessage = data.Message;
+						requestRunning = false;
+					 	j('#loading_Cat').hide();
+						j('#mainHeader').load(headerBackBtn);
+					 	j('#mainContainer').load(pageRef);
+						
+					}else if(data.Status=="Failure"){
+					 	successMessage = data.Message;
+						requestRunning = false;
+					 	j('#loading_Cat').hide();
+						j('#mainHeader').load(headerBackBtn);
+					 	j('#mainContainer').load(pageRef);
+					 }else{
+						 j('#loading_Cat').hide();
+						successMessage = "Oops!! Something went wrong. Please contact system administrator.";
+						j('#mainHeader').load(headerBackBtn);
+					 	j('#mainContainer').load(pageRef);
+					 }
+					},
+				  error:function(data) {
+					j('#loading_Cat').hide();
+					requestRunning = false;
+					alert("Error: Oops something is wrong, Please Contact System Administer");
+				  }
+	});
+}
+
+function validateEmpAdvanceDetails(empAdvDate,empAdvTitle,empAdvjustification,empAdvAmount,empAdvType_id,empAdvType_Name,empAccHead_id,empAccHead_Name){
+    
+	if(empAdvDate==""){
+		alert("Advance Date is required");
+		return false;
+	}
+	if(empAdvTitle == ""){
+		alert("Advance Title is required");
+		return false;
+	}
+    if(empAdvjustification == ""){
+		alert("justification is required");
+		return false;
+	}
+     if(empAdvAmount == ""){
+		alert("Amount is required");
+		return false;
+	}
+    
+   if(empAdvAmount != ""){
+    if(isOnlyNumeric(empAdvAmount,"Amount")==false)
+        {
+         document.getElementById("empAdvAmount").value = "";
+          return false;
+        }
+			
+		}else{
+			alert("Amount is invalid");
+			return false;
+		}
+    
+    if(isZero(empAdvAmount,"Amount")==false){
+		document.getElementById("empAdvAmount").value = "";
+		return false;
+	}
+    
+	if(empAdvType_id == "-1" || empAdvType_id == ""){
+		alert("Advance Type is invalid");
+		return false;
+	}
+	if(empAccHead_id == "-1" || empAccHead_id == ""){
+		alert("Expense Type is invalid");
+		return false;
+	}
+	
+	return true;
+}
+
+
+function displayEmpAdvanceExp(){	 
+		 var headerBackBtn=defaultPagePath+'headerPageForBEOperation.html';
+     var pageRef=defaultPagePath+'availableEmpAdvance.html';
+			j(document).ready(function() {
+				j('#mainHeader').load(headerBackBtn);
+				j('#mainContainer').load(pageRef);
+			});
+      appPageHistory.push(pageRef);
+}
+     
+function hideEAIcons(){
+	if(window.localStorage.getItem("EaInMobile") == "true"){
+		document.getElementById('CategoryEAId').style.display="block";		
+	}else{
+		document.getElementById('CategoryEAId').style.display="none";
+	}
+}
+
+function hideEAMenus(){
+	if(window.localStorage.getItem("EaInMobile") == "true"){
+		document.getElementById('EaDisplayID').style.display="block";
+	}else{
+		document.getElementById('EaDisplayID').style.display="none";
+	}
+}
+
+function hideEmployeeAdvance(){
+	if(window.localStorage.getItem("EaInMobile") == "true"){
+        fetchEmployeeAdvance();
+        document.getElementById('helpimage').style.display="";
+		//document.getElementById('EA').style.display="";
+	}else{
+        fetchExpenseClaim();
+        document.getElementById('helpimage').style.display="none";
+		document.getElementById('EA').style.display="none";
+	}
+}
+
+
+
+function populateBEAmount(){
+                        var BEAmount = 0;
+                        var convAmount = 0;
+                          if(j("#source tr.selected").hasClass("selected")){
+                              j("#source tr.selected").each(function(index, row) {
+                                  var Amount = j(this).find('td.expAmt1').text();
+                                  
+                                  var convRate = j(this).find('td.conversionRate').text();
+                                  //get Amount 
+                                  convAmount = parseFloat(Amount) * parseFloat(Math.round(convRate * 100) / 100);
+                                   BEAmount =parseFloat(BEAmount) + parseFloat(Math.round(convAmount * 100) / 100);
+                              });
+
+                            if(BEAmount!= "" ){
+                                 document.getElementById("totalAmount").value = BEAmount;
+                              }
+                          }else{
+                             document.getElementById("totalAmount").value = "";
+                          }   
+}
+
+
+function populateEAAmount(){
+             var EAAmount = 0;
+				 if(j("#source1 tr.selected").hasClass("selected")){
+				        j("#source1 tr.selected").each(function(index, row) {
+                              var Amount = j(this).find('td.Amount').text();
+							  //get Amount 
+                               EAAmount =parseFloat(EAAmount) + parseFloat(Amount);
+						    });
+						  
+				        if(EAAmount!= "" ){
+						  document.getElementById("unsetAdvAmount").value = EAAmount;
+				           }
+				   }else{
+						  document.getElementById("unsetAdvAmount").value = "";
+                   }
+}
+     
+function calculateAmount(){
+         var beAmount = 0
+         var eaAmount = 0 
+         beAmount = document.getElementById("totalAmount").value;
+         eaAmount = document.getElementById("unsetAdvAmount").value;
+    
+       if(beAmount != "" && beAmount != 0  && eaAmount != ""  && eaAmount != 0 ){
+           if(parseFloat(beAmount) > parseFloat(eaAmount)){
+           document.getElementById("refundToEmp").value = parseFloat(beAmount) - parseFloat(eaAmount);
+           document.getElementById("recoverFromEmp").value = "0";
+           }else if(parseFloat(eaAmount) > parseFloat(beAmount)){
+           document.getElementById("recoverFromEmp").value = parseFloat(eaAmount) - parseFloat(beAmount);
+           document.getElementById("refundToEmp").value = "0";
+           }else{
+           document.getElementById("refundToEmp").value = "0";
+           document.getElementById("recoverFromEmp").value = "0";
+           }
+       }else{
+           document.getElementById("refundToEmp").value = "0";
+           document.getElementById("recoverFromEmp").value = "0";
+       }
+}
+
+
+   function displayEmpAdv(){
+        var headerBackBtn=defaultPagePath+'backbtnPage.html';
+           var pageRef=defaultPagePath+'fairClaimTable.html';
+			j(document).ready(function() {
+				j('#mainHeader').load(headerBackBtn);
+			});
+         document.getElementById('BE').style.display = "none";
+         document.getElementById('EA').style.display = "";
+        document.getElementById('helpimage').style.display = "none";
+       appPageHistory.push(pageRef);
+    }
+
+function submitBEWithEA(){
+    var jsonExpenseDetailsArr = [];
+    var busExpDetailsArr = [];
+    var jsonEmplAdvanceArr = [];
+    var emplAdvanceDetailsArr = [];
+				  expenseClaimDates=new Object;
+				  if(requestRunning){
+						  	return;
+	    					}
+				  var accountHeadIdToBeSent=''
+					  if(j("#source tr.selected").hasClass("selected")){
+						  j("#source tr.selected").each(function(index, row) {
+							  var busExpDetailId = j(this).find('td.busExpId').text();
+							  var jsonFindBE = new Object();
+							  var expDate = j(this).find('td.expDate1').text();
+							  var expenseDate  = expDate;
+							  var currentDate=new Date(expenseDate);
+							  //get Start Date
+							  if(!expenseClaimDates.hasOwnProperty('minInDateFormat')){
+								  expenseClaimDates["minInDateFormat"]=currentDate;
+								  expenseClaimDates["minInStringFormat"]=expenseDate;
+							  }else{
+								  if(expenseClaimDates.minInDateFormat>currentDate){
+									  expenseClaimDates["minInDateFormat"]=currentDate;
+									  expenseClaimDates["minInStringFormat"]=expenseDate;
+								  }
+							  }
+							  //get End Date
+							  if(!expenseClaimDates.hasOwnProperty('maxInDateFormat')){
+								  expenseClaimDates["maxInDateFormat"]=currentDate;
+								  expenseClaimDates["maxInStringFormat"]=expenseDate;
+							  }else{
+								  if(expenseClaimDates.maxInDateFormat<currentDate){
+									  expenseClaimDates["maxInDateFormat"]=currentDate;
+									  expenseClaimDates["maxInStringFormat"]=expenseDate;
+								  }
+							  }
+
+							  jsonFindBE["expenseDate"] = expenseDate;
+							  //get Account Head
+							  var currentAccountHeadID=j(this).find('td.accHeadId').text();
+
+							  if(validateAccountHead(accountHeadIdToBeSent,currentAccountHeadID)==false){
+								  exceptionMessage="Selected expenses should be mapped under Single Expense Type/Account Head."
+									  j('#displayError').children('span').text(exceptionMessage);
+								  j('#displayError').hide().fadeIn('slow').delay(3000).fadeOut('slow');
+								  requestRunning = false;
+								  accountHeadIdToBeSent="";
+							  }else{
+								  accountHeadIdToBeSent=currentAccountHeadID
+
+								  jsonFindBE["accountCodeId"] = j(this).find('td.accountCodeId').text();
+								  jsonFindBE["ExpenseId"] =j(this).find('td.expNameId').text();
+								  jsonFindBE["ExpenseName"] = j(this).find('td.expName').text();
+								  jsonFindBE["fromLocation"] = j(this).find('td.expFromLoc1').text();
+								  jsonFindBE["toLocation"] = j(this).find('td.expToLoc1').text();
+								  jsonFindBE["narration"] = j(this).find('td.expNarration1').text();
+
+								  jsonFindBE["isErReqd"] = j(this).find('td.isErReqd').text();
+								  jsonFindBE["ERLimitAmt"] = j(this).find('td.ERLimitAmt').text();
+
+								  jsonFindBE["perUnitException"] = j(this).find('td.isEntitlementExceeded').text();
+
+								  if(j(this).find('td.expUnit').text()!="" ) {
+									  jsonFindBE["units"] = j(this).find('td.expUnit').text();
+								  }
+								  
+								  jsonFindBE["wayPoint"] = j(this).find('td.wayPoint').text();
+								
+								  jsonFindBE["amount"] = j(this).find('td.expAmt1').text();
+								  jsonFindBE["currencyId"] = j(this).find('td.currencyId').text();
+
+								  var dataURL =  j(this).find('td.busAttachment').text();
+
+								  //For IOS image save
+								  var data = dataURL.replace(/data:image\/(png|jpg|jpeg);base64,/, '');
+
+								  //For Android image save
+								  //var data = dataURL.replace(/data:base64,/, '');
+
+								  jsonFindBE["imageAttach"] = data; 
+
+								  jsonExpenseDetailsArr.push(jsonFindBE);
+
+								  busExpDetailsArr.push(busExpDetailId);
+								  requestRunning = true;
+							  }
+						  });
+                            
+                          
+                         if(j("#source1 tr.selected").hasClass("selected")){                    				                j("#source1 tr.selected").each(function(index, row) {
+                            var jsonFindEA = new Object();
+				            jsonFindEA["empAdvID"] = j(this).find('td.empAdvID').text();
+                            jsonFindEA["emplAdvVoucherNo"] = j(this).find('td.emplAdvVoucherNo').text();
+                            jsonFindEA["empAdvTitle"] = j(this).find('td.empAdvTitle').text();
+                            jsonFindEA["Amount"] = j(this).find('td.Amount').text();
+                            emplAdvanceDetailsArr.push(j(this).find('td.empAdvID').text());
+                            jsonEmplAdvanceArr.push(jsonFindEA);
+						    });
+                               
+				   }      				  
+						if(accountHeadIdToBeSent!="" && busExpDetailsArr.length>0){
+						  	 sendForApprovalBusinessDetailsWithEa(jsonExpenseDetailsArr,jsonEmplAdvanceArr,busExpDetailsArr,emplAdvanceDetailsArr,accountHeadIdToBeSent);
+						  }
+					  }else{
+						 alert("Tap and select Expenses to send for Approval with server.");
+                      }
+    
+}
+
+
+function sendForApprovalBusinessDetailsWithEa(jsonBEArr,jsonEAArr,busExpDetailsArr,empAdvArr,accountHeadID){
+	 var jsonToSaveBE = new Object();
+     var totalAmount = 0;
+     var unsetAdvAmount= 0;
+     var refundToEmp= 0;
+     var recoverFromEmp = 0;
+    
+      totalAmount = document.getElementById("totalAmount").value;
+      unsetAdvAmount = document.getElementById("unsetAdvAmount").value;
+      refundToEmp = document.getElementById("refundToEmp").value;
+      recoverFromEmp = document.getElementById("recoverFromEmp").value;
+    
+	 jsonToSaveBE["employeeId"] = window.localStorage.getItem("EmployeeId");
+	 jsonToSaveBE["expenseDetails"] = jsonBEArr;
+     jsonToSaveBE["totalAmount"] = totalAmount;
+     jsonToSaveBE["unsetAdvAmount"] = unsetAdvAmount;
+     jsonToSaveBE["refundToEmp"] = refundToEmp;
+     jsonToSaveBE["recoverFromEmp"] = recoverFromEmp;
+     jsonToSaveBE["employeeAdvDeatils"] = jsonEAArr;
+	 jsonToSaveBE["startDate"]=expenseClaimDates.minInStringFormat;
+	 jsonToSaveBE["endDate"]=expenseClaimDates.maxInStringFormat;
+	 jsonToSaveBE["DelayAllowCheck"]=false;
+	 jsonToSaveBE["BudgetingStatus"]=window.localStorage.getItem("BudgetingStatus");
+	 jsonToSaveBE["accountHeadId"]=accountHeadID;
+	 jsonToSaveBE["ProcessStatus"] = "1";
+	 jsonToSaveBE["title"]= window.localStorage.getItem("FirstName")+"/"+jsonToSaveBE["startDate"]+" to "+jsonToSaveBE["endDate"];
+	
+	 var pageRef=defaultPagePath+'success.html';
+	 callSendForApprovalServiceForBEwithEA(jsonToSaveBE,busExpDetailsArr,empAdvArr,pageRef);
+	 
+}
+
+function callSendForApprovalServiceForBEwithEA(jsonToSaveBE,busExpDetailsArr,empAdvArr,pageRef){
+j('#loading_Cat').show();
+var headerBackBtn=defaultPagePath+'backbtnPage.html';
+j.ajax({
+				  url: window.localStorage.getItem("urlPath")+"SynchSubmitBusinessExpense",
+				  type: 'POST',
+				  dataType: 'json',
+				  crossDomain: true,
+				  data: JSON.stringify(jsonToSaveBE),
+				  success: function(data) {
+				  	if(data.Status=="Success"){
+					  	if(data.hasOwnProperty('DelayStatus')){
+					  		setDelayMessage(data,jsonToSaveBE,busExpDetailsArr);
+					  		 j('#loading_Cat').hide();
+					  	}else{
+						 successMessage = data.Message;
+						 for(var i=0; i<busExpDetailsArr.length; i++ ){
+							var businessExpDetailId = busExpDetailsArr[i];
+							deleteSelectedExpDetails(businessExpDetailId);
+						 }
+                         for(var i=0; i<empAdvArr.length; i++ ){
+							var empAdvId = empAdvArr[i];
+							deleteSelectedEmplAdv(empAdvId);
+						 }
+						 requestRunning = false;
+						 j('#loading_Cat').hide();
+						 j('#mainHeader').load(headerBackBtn);
+						 j('#mainContainer').load(pageRef);
+						// appPageHistory.push(pageRef);
+						}
+					}else if(data.Status=="Failure"){
+					 	successMessage = data.Message;
+						requestRunning = false;
+					 	j('#loading_Cat').hide();
+						j('#mainHeader').load(headerBackBtn);
+					 	j('#mainContainer').load(pageRef);
+					 }else{
+						 j('#loading_Cat').hide();
+						successMessage = "Oops!! Something went wrong. Please contact system administrator.";
+						j('#mainHeader').load(headerBackBtn);
+					 	j('#mainContainer').load(pageRef);
+					 }
+					},
+				  error:function(data) {
+					j('#loading_Cat').hide();
+					requestRunning = false;
+					alert("Error: Oops something is wrong, Please Contact System Administer");
+				  }
+			});
+}
+// changes for sms app
+	 function createSMS(){
+		 
+		 var headerBackBtn=defaultPagePath+'headerPageForWalletOperation.html';
+		 var pageRef=defaultPagePath+'sms.html';
+			j(document).ready(function() {
+				j('#mainHeader').load(headerBackBtn);
+				j('#mainContainer').load(pageRef);
+			});
+      appPageHistory.push(pageRef);
+	 }
+
+
+	 function update( id, str ) {
+        	$('div#' + id).html( str );
+        }
+        function updateStatus( str ) {
+        	$('div#status').html( str );
+        }
+        function updateData( str ) {
+        	$('div#data').html( str );
+        }
+
+    
+
+       function listSMS() {
+    		updateData('');
+    		
+ 			var filter = {
+                box : 'inbox', // 'inbox' (default), 'sent', 'draft', 'outbox', 'failed', 'queued', and '' for all
+                // following 4 filters should NOT be used together, they are OR relationship
+              //address : 'VK-iPaytm', 
+				 read : 0,
+              body : 'MUMBAIMETRO',
+                // following 2 filters can be used to list page up/down
+                indexFrom : 0, // start from index 0
+            };
+        	if(SMS) SMS.listSMS(filter, function(data){
+    			updateStatus('sms listed as json array');
+    			//updateData( JSON.stringify(data) );
+    			
+    			var html = "";
+        		if(Array.isArray(data)) {
+        			for(var i in data) {
+        				var sms = data[i];
+        				smsList.push(sms);
+        				html += sms.address + ": " + sms.body + "<br/>";
+        			}
+        		}
+        		updateData( html );
+        		
+        	}, function(err){
+        		updateStatus('error list sms: ' + err);
+        	});
+        }
+        function listSMSfilter() {
+    		updateData('');
+    		
+ 			var filter = {
+                box : 'inbox', // 'inbox' (default), 'sent', 'draft', 'outbox', 'failed', 'queued', and '' for all
+                // following 4 filters should NOT be used together, they are OR relationship
+                read : 0,
+              //address : 'VK-iPaytm', 
+              //body : 'paytm',
+                // following 2 filters can be used to list page up/down
+                indexFrom : 0, // start from index 0
+            };
+        	if(SMS) SMS.listSMS(filter, function(data){
+    			updateStatus('sms listed as json array');
+    			//updateData( JSON.stringify(data) );
+    			
+    			var html = "";
+        		if(Array.isArray(data)) {
+        			for(var i in data) {
+        				var sms = data[i];
+        				smsList.push(sms);
+        				html += sms.address + ": " + sms.body + "<br/>";
+        			}
+        		}
+        		updateData( html );
+        		
+        	}, function(err){
+        		updateStatus('error list sms: ' + err);
+        	});
+        }
+	var listOfMsg = [] ;
+	function listSMSsenderfilter() {
+    		updateData('');
+ 			var filter = {
+                box : 'inbox', // 'inbox' (default), 'sent', 'draft', 'outbox', 'failed', 'queued', and '' for all
+                // following 4 filters should NOT be used together, they are OR relationship
+              address : 'VM-IPAYTM', 
+              //body : 'paytm',
+                // following 2 filters can be used to list page up/down
+                indexFrom : 0, // start from index 0
+            };
+        	if(SMS) SMS.listSMS(filter, function(data){
+    			updateStatus('sms listed as json array');
+    			//updateData( JSON.stringify(data) );
+    			
+    			var html = "";
+        		if(Array.isArray(data)) {
+        			for(var i in data) {
+        				var sms = data[i];
+        				smsList.push(sms);
+        				var smsMsg = sms.body;
+        				if(smsMsg.includes("successful") && !(smsMsg.includes("successfully"))){
+        					html += sms.address + ": " + sms.body + "<br/><br/>";
+        					listOfMsg[i]=sms.body;
+        				}if(smsMsg.includes("You paid")){
+        					html += sms.address + ": " + sms.body + "<br/><br/>";
+        					listOfMsg[i]=sms.body;
+        				}
+        			}
+        		}
+        		updateData( html );
+			alert("length of message list   "+listOfMsg.length);
+        		parseMessages(listOfMsg);
+        		
+        	}, function(err){
+        		updateStatus('error list sms: ' + err);
+        	});
+        }
+         
+
+      function parseMessages(listOfMsg){
+        	var aa = "";
+        	for(var i=0; i<listOfMsg.length; i++){
+        		var msg = ""+listOfMsg[i];
+        		
+        			alert("inside of parseMessages  "+msg);
+          			var sString = msg.split("Rs.");
+        			var splitString = sString[1];
+        			alert(i+"  "+splitString);
+        			var demoString = splitString.split(" ");
+        			aa = aa+demoString[0] ;
+        			alert(aa)
+        		
+        		aa = "  ";
+        	}
+        	updateStatus(aa);
+        }

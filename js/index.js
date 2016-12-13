@@ -1293,29 +1293,26 @@ function setPerUnitDetails(transaction, results){
 					document.getElementById("expAmt").value="";
 					if(perUnitDetailsJSON.expFixedOrVariable=='V'){
 						flagForUnitEnable = true;
-						if(perUnitDetailsJSON.expenseIsfromAndToReqd=='Y' && window.localStorage.getItem("MobileMapRole") == 'true'){
-							document.getElementById("expUnit").disabled =true;
-							document.getElementById("expUnit").style.backgroundColor='#d1d1d1';
+						if(window.localStorage.getItem("MobileMapRole") == 'true') 
+						{
+							document.getElementById("expAmt").disabled =false;
+							document.getElementById("expAmt").style.backgroundColor='#FFFFFF';
 						}
-						else{
-							document.getElementById("expUnit").disabled =false;
-							document.getElementById("expUnit").style.backgroundColor='#FFFFFF';
+						else
+						{
+							flagForUnitEnable = true;
+							if(window.localStorage.getItem("MobileMapRole") == 'true') 
+							{
+								document.getElementById("expUnit").disabled =true;
+								document.getElementById("expUnit").style.backgroundColor='#d1d1d1';
+							}
+							else{
+								document.getElementById("expUnit").disabled =false;
+								document.getElementById("expUnit").style.backgroundColor='#FFFFFF';
+							} 
+							document.getElementById("expAmt").disabled =true;
+							document.getElementById("expAmt").style.backgroundColor='#d1d1d1';
 						}
-						document.getElementById("expAmt").disabled =false;
-						document.getElementById("expAmt").style.backgroundColor='#FFFFFF';
-					}else{
-						flagForUnitEnable = true;
-						if(perUnitDetailsJSON.expenseIsfromAndToReqd=='Y' && window.localStorage.getItem("MobileMapRole") == 'true'){
-							document.getElementById("expUnit").disabled =true;
-							document.getElementById("expUnit").style.backgroundColor='#d1d1d1';
-						}
-						else{
-							document.getElementById("expUnit").disabled =false;
-							document.getElementById("expUnit").style.backgroundColor='#FFFFFF';
-						}
-						document.getElementById("expAmt").disabled =true;
-						document.getElementById("expAmt").style.backgroundColor='#d1d1d1'; 
-					}
 					}else{
 						flagForUnitEnable = true;
 						document.getElementById("expUnit").disabled =false;
@@ -1326,9 +1323,9 @@ function setPerUnitDetails(transaction, results){
 				}else{
 					flagForUnitEnable = false;
 					document.getElementById("expUnit").disabled =true;
-					document.getElementById("expUnit").style.backgroundColor='#d1d1d1'; 
 					document.getElementById("expAmt").disabled =false;
 					document.getElementById("expAmt").style.backgroundColor='#FFFFFF'; 
+					document.getElementById("expUnit").style.backgroundColor='#d1d1d1'; 
 				}
 				if(perUnitDetailsJSON.expPerUnitActiveInative=='1'){
 					flagForUnitEnable=false;

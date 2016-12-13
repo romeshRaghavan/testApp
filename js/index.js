@@ -104,8 +104,8 @@ function commanLogin(){
  	var domainName = userNameValue.split('@')[1];
 	var jsonToDomainNameSend = new Object();
 	jsonToDomainNameSend["userName"] = domainName;
-	//jsonToDomainNameSend["mobilePlatform"] = device.platform;
-	jsonToDomainNameSend["mobilePlatform"] = "Android";
+	jsonToDomainNameSend["mobilePlatform"] = device.platform;
+	//jsonToDomainNameSend["mobilePlatform"] = "Android";
   	//var res=JSON.stringify(jsonToDomainNameSend);
 	var requestPath = WebServicePath;
 	j.ajax({
@@ -1239,7 +1239,6 @@ function onloadTimePicker(){
 	     getCategoryFromDB(modeID);
 	 }
 
-
 function setPerUnitDetails(transaction, results){
  		 
     	if(results!=null){
@@ -1340,6 +1339,7 @@ function setPerUnitDetails(transaction, results){
 		}
  	
  	}
+
 
  	function setModeCategroyDetails(transaction, results){
  	

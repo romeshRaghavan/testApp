@@ -35,7 +35,12 @@
     <gap:plugin name="cordova-plugin-camera" source="npm" />
     <!--<gap:plugin name="org.apache.cordova.core.camera" />
      <plugin name="org.apache.cordova.camera" spec="0.2.3" source="pgb" /> -->
-    <gap:plugin name="cordova-plugin-media-capture" source="npm" />
+    <!--<gap:plugin name="cordova-plugin-media-capture" source="npm" /> -->
+    <plugin name="cordova-plugin-media-capture" source="npm" spec="*">
+        <variable name="CAMERA_USAGE_DESCRIPTION" value="App would like to access the camera." />
+        <variable name="MICROPHONE_USAGE_DESCRIPTION" value="App would like to access the microphone." />
+        <variable name="PHOTOLIBRARY_USAGE_DESCRIPTION" value="App would like to access the library." />
+    </plugin>
     <gap:plugin name="cordova-plugin-console" source="npm" />
     <gap:plugin name="cordova-plugin-contacts" source="npm" />
     <gap:plugin name="cordova-plugin-device" source="npm" />

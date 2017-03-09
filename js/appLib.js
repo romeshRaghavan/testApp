@@ -436,7 +436,12 @@ function fetchExpenseClaim() {
 				}
 				else
 				{
-					j('<td></td>').attr({ class: ["expNarration"].join(' ') }).html('<p>'+row.expNarration+'</br>'+row.expFromLoc+"/"+row.expToLoc+ '</P>').appendTo(rowss);
+					if(row.expFromLoc != '' && row.expToLoc != '')
+					{
+						j('<td></td>').attr({ class: ["expNarration"].join(' ') }).html('<p>'+row.expNarration+'</br>'+row.expFromLoc+"/"+row.expToLoc+ '</P>').appendTo(rowss);	
+					}else{
+						j('<td></td>').attr({ class: ["expNarration"].join(' ') }).html('<p>'+row.expNarration+'</br>'+row.expFromLoc+""+row.expToLoc+ '</P>').appendTo(rowss);
+					}		
 				}
 				
 				if(row.busExpAttachment.length == 0){
@@ -1758,7 +1763,12 @@ function fetchEmployeeAdvance() {
 				}
 				else
 				{
-					j('<td></td>').attr({ class: ["expNarration"].join(' ') }).html('<p>'+row.expNarration+'</br>'+row.expFromLoc+"/"+row.expToLoc+ '</P>').appendTo(rowss);
+					if(row.expFromLoc != '' && row.expToLoc != '')
+					{
+						j('<td></td>').attr({ class: ["expNarration"].join(' ') }).html('<p>'+row.expNarration+'</br>'+row.expFromLoc+"/"+row.expToLoc+ '</P>').appendTo(rowss);
+					}else{
+						j('<td></td>').attr({ class: ["expNarration"].join(' ') }).html('<p>'+row.expNarration+'</br>'+row.expFromLoc+""+row.expToLoc+ '</P>').appendTo(rowss);
+					}
 				}
 				
 				if(row.busExpAttachment.length == 0){

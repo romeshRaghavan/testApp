@@ -1231,8 +1231,9 @@ function saveWalletAttachment(status){
 	j('#loading_Cat').show();
 	if (mydb) {
 		//get the values of the text inputs
-      
-		var file = document.getElementById('imageWallet').files[0];
+		
+	  //var file = document.getElementById('imageWallet').files[0];
+        var file = document.getElementById("imageWallet").src;
 		
 	if (file != "") {
             mydb.transaction(function (t) {
